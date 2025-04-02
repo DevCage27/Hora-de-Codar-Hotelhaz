@@ -1,0 +1,339 @@
+// Definição do nome do hotel
+const val HOTEL = "Hotel HAZ"
+
+// Lista de quartos (inicialmente todos livres)
+val quartos = MutableList(20) { false } // false = livre, true = ocupado
+
+// Função para exibir mensagem de boas-vindas
+fun boasVindas(nome: String) {
+    println("Bem vindo ao $HOTEL, $nome. É um imenso prazer ter você por aqui!")
+}
+
+// Função para exibir mensagem de despedida
+fun despedida(nome: String) {
+    println("Muito obrigado e até logo, $nome.")
+}
+
+// Função para exibir mensagem de erro
+fun erro() {
+    println("Opção inválida. Tente novamente.")
+}
+
+// Função principal do menu
+fun inicio(nome: String) {
+    while (true) {
+        println("\nMenu Principal:")
+        println("1. Reservar quarto")
+        println("2. Cadastrar hóspedes")
+        println("3. Pesquisar hóspedes")
+        println("4. Reservar evento")
+        println("5. Abastecer carro")
+        println("6. Manutenção de ar-condicionado")
+        println("7. Sair")
+        print("Escolha uma opção: ")
+        when (readlnOrNull()) {
+            "1" -> reservarQuarto(nome)
+            "2" -> cadastrarHospedes(nome)
+            "3" -> pesquisarHospedes(nome)
+            "4" -> reservarEvento(nome)
+            "5" -> abastecerCarro(nome)
+            "6" -> manutencaoArCondicionado(nome)
+            "7" -> {
+                despedida(nome)
+                break
+            }
+            else -> erro()
+        }
+    }
+}
+
+// Função para reservar quarto
+fun reservarQuarto(nome: String) {
+    while (true) {
+        print("Qual o valor padrão da diária? ")
+        val diaria = readlnOrNull()?.toDoubleOrNull() ?: continue
+        if (diaria < 0) {
+            println("Valor inválido, $nome")
+            continue
+        }
+
+        print("Quantas diárias serão necessárias? ")
+        val dias = readlnOrNull()?.toIntOrNull() ?: continue
+        if (dias < 0 || dias > 30) {
+            println("Valor inválido, $nome")
+            continue
+        }
+
+        val valorTotal = diaria * dias
+        println("O valor de $dias dias de hospedagem é de R$${valorTotal:.2f}")
+
+        print("Qual o nome do hóspede? ")
+        val hospede = readlnOrNull() ?: continue
+
+        while (true) {
+            print("Qual o quarto para reserva? (1 - 20): ")
+            val quarto = (readlnOrNull()?.toIntOrNull() ?: continue) - 1
+            if (quarto < 0 || quarto >= 20) {
+                println("Quarto inválido.")
+                continue
+            }
+
+            if (quartos[quarto]) {
+                println("Quarto já está ocupado. Escolha outro.")
+                println("Lista de quartos e suas ocupações:")
+                for (i in quartos.indices) {
+                    val status = if (quartos[i]) "ocupado" else "livre"
+                    println("${i + 1}- $status")
+                }
+            } else {
+                break
+            }
+        }
+
+        print("$nome, você confirma a hospedagem para $hospede por $dias dias para o quarto ${quarto + 1} por R$${valorTotal:.2f}? S/N: ")
+        if (readlnOrNull()?.uppercase() == "S") {
+            quartos[quarto] = true
+            println("$nome, reserva efetuada para $hospede.")
+            println("Lista de quartos e suas ocupações:")
+            for (i in quartos.indices) {
+                val status = if (quartos[i]) "ocupado" else "livre"
+                println("${i + 1}- $status")
+            }
+            break
+        } else {
+            println("Reserva cancelada.")
+            break
+        }
+    }
+}
+
+// Função para cadastrar hóspedes
+fun cadastrarHospedes(nome: String) {
+    print("Qual o valor padrão da diária? ")
+    val diaria = readlnOrNull()?.toDoubleOrNull() ?: return
+
+    var gratuidades = 0
+    var meias = 0
+    var total = 0.0
+
+    while (true) {
+        print("Qual o nome do Hóspede? (Digite 'PARE' para encerrar): ")
+        val hospede = readlnOrNull() ?: continue
+        if (hospede.uppercase() == "PARE") break
+
+        print("Qual a idade do Hóspede? ")
+        val idade = readlnOrNull()?.toIntOrNull() ?: continue
+
+        when {
+            idade < 6 -> {
+                println("$hospede possui gratuidade.")
+                gratuidades++
+            }
+            idade > 60 -> {
+                println("$hospede paga meia.")
+                meias++
+                total += diaria / 2
+            }
+            else -> {
+                println("$hospede cadastrada(o) com sucesso.")
+                total += diaria
+            }
+        }
+    }
+
+    println("$nome, o valor total das hospedagens é: R$${total:.2f}; $gratuidades gratuidade(s); $meias meia(s)")
+}
+
+// Função para pesquisar hóspedes
+fun pesquisarHospedes(nome: String) {
+    val hospedes = mutableListOf<String>()
+    while (true) {
+        println("\nMenu de Hóspedes:")
+        println("1. Cadastrar")
+        println("2. Pesquisar")
+        println("3. Listar")
+        println("4. Sair")
+        print("Escolha uma opção: ")
+        when (readlnOrNull()) {
+            "1" -> {
+                if (hospedes.size >= 15) {
+                    println("Máximo de cadastros atingido.")
+                } else {
+                    print("Qual o nome do Hóspede? ")
+                    val hospede = readlnOrNull() ?: continue
+                    hospedes.add(hospede)
+                    println("Hóspede $hospede foi cadastrada(o) com sucesso!")
+                }
+            }
+            "2" -> {
+                print("Qual o nome do Hóspede? ")
+                val hospede = readlnOrNull() ?: continue
+                if (hospede in hospedes) {
+                    println("Hóspede $hospede foi encontrada(o)!")
+                } else {
+                    println("Hóspede não encontrado.")
+                }
+            }
+            "3" -> {
+                for (h in hospedes) {
+                    println(h)
+                }
+            }
+            "4" -> break
+            else -> erro()
+        }
+    }
+}
+
+// Função para reservar evento
+fun reservarEvento(nome: String) {
+    // Parte 1: Onde será o evento?
+    var convidados: Int
+    while (true) {
+        print("Qual o número de convidados para o seu evento? ")
+        convidados = readlnOrNull()?.toIntOrNull() ?: continue
+        if (convidados < 0 || convidados > 350) {
+            println("Quantidade de convidados superior à capacidade máxima.")
+            continue
+        }
+
+        if (convidados <= 150) {
+            val cadeirasAdicionais = maxOf(0, convidados - 150)
+            if (cadeirasAdicionais > 70) {
+                println("Quantidade de convidados superior à capacidade máxima.")
+                continue
+            }
+            println("Use o auditório Laranja (inclua mais $cadeirasAdicionais cadeiras)")
+        } else {
+            println("Use o auditório Colorado")
+        }
+        break
+    }
+
+    // Parte 2: Quando será o evento?
+    var dia: String
+    var hora: Int
+    while (true) {
+        print("Qual o dia do evento? ")
+        dia = readlnOrNull()?.lowercase() ?: continue
+        print("Qual é a hora do evento? ")
+        hora = readlnOrNull()?.toIntOrNull() ?: continue
+
+        if (dia in listOf("sabado", "domingo") && (hora < 7 || hora > 15)) {
+            println("Auditório indisponível")
+            continue
+        } else if (dia in listOf("segunda", "terca", "quarta", "quinta", "sexta") && (hora < 7 || hora > 23)) {
+            println("Auditório indisponível")
+            continue
+        } else {
+            print("Qual o nome da empresa? ")
+            val empresa = readlnOrNull() ?: continue
+            println("Auditório reservado para $empresa. ${dia.capitalize()} às ${hora}h.")
+            break
+        }
+    }
+
+    // Parte 3: Quantos trabalharão no evento?
+    print("Qual a duração do evento em horas? ")
+    val horas = readlnOrNull()?.toIntOrNull() ?: return
+    val garcons = (convidados / 12) + (horas / 2)
+    val custoGarcons = garcons * 10.5 * horas
+    println("São necessários $garcons garçons.")
+    println("Custo: R$${custoGarcons:.2f}")
+
+    // Parte 4: E quanto ao Buffet?
+    val cafe = convidados * 0.2
+    val agua = convidados * 0.5
+    val salgados = convidados * 7
+    val custoCafe = cafe * 0.8
+    val custoAgua = agua * 0.4
+    val custoSalgados = (salgados / 100) * 34
+    val custoBuffet = custoCafe + custoAgua + custoSalgados
+    println("O evento precisará de ${cafe:.1f} litros de café, ${agua:.1f} litros de água, $salgados salgados.")
+    println("Custo do Buffet: R$${custoBuffet:.2f}")
+
+    // Parte 5: Conferência
+    println("\nRelatório do Evento:")
+    println("Evento no Auditório ${if (convidados <= 150) "Laranja" else "Colorado"}.")
+    println("Nome da Empresa: $empresa.")
+    println("Data: ${dia.capitalize()}, ${hora}h às ${hora + horas}h.")
+    println("Duração do evento: ${horas}H.")
+    println("Quantidade de garçons: $garcons.")
+    println("Quantidade de Convidados: $convidados")
+    println("Custo do garçons: R$${custoGarcons:.2f}")
+    println("Custo do Buffet: R$${custoBuffet:.2f}")
+    println("Valor total do Evento: R$${custoGarcons + custoBuffet:.2f}")
+
+    print("Gostaria de efetuar a reserva? S/N: ")
+    if (readlnOrNull()?.uppercase() == "S") {
+        println("$nome, reserva efetuada com sucesso.")
+    } else {
+        println("Reserva não efetuada.")
+    }
+}
+
+// Função para abastecer carro
+fun abastecerCarro(nome: String) {
+    print("Qual o valor do álcool no posto Wayne Oil? ")
+    val alcoolWayne = readlnOrNull()?.toDoubleOrNull() ?: return
+    print("Qual o valor da gasolina no posto Wayne Oil? ")
+    val gasolinaWayne = readlnOrNull()?.toDoubleOrNull() ?: return
+    print("Qual o valor do álcool no posto Stark Petrol? ")
+    val alcoolStark = readlnOrNull()?.toDoubleOrNull() ?: return
+    print("Qual o valor da gasolina no posto Stark Petrol? ")
+    val gasolinaStark = readlnOrNull()?.toDoubleOrNull() ?: return
+
+    // Verifica se o álcool é 30% mais barato que a gasolina
+    when {
+        alcoolWayne <= gasolinaWayne * 0.7 -> println("$nome, é mais barato abastecer com álcool no posto Wayne Oil.")
+        alcoolStark <= gasolinaStark * 0.7 -> println("$nome, é mais barato abastecer com álcool no posto Stark Petrol.")
+        gasolinaWayne < gasolinaStark -> println("$nome, é mais barato abastecer com gasolina no posto Wayne Oil.")
+        else -> println("$nome, é mais barato abastecer com gasolina no posto Stark Petrol.")
+    }
+}
+
+// Função para manutenção de ar-condicionado
+fun manutencaoArCondicionado(nome: String) {
+    val orcamentos = mutableListOf<Pair<String, Double>>()
+    while (true) {
+        print("Qual o nome da empresa? ")
+        val empresa = readlnOrNull() ?: continue
+        print("Qual o valor por aparelho? ")
+        val valorAparelho = readlnOrNull()?.toDoubleOrNull() ?: continue
+        print("Qual a quantidade de aparelhos? ")
+        val quantidade = readlnOrNull()?.toIntOrNull() ?: continue
+        print("Qual a porcentagem de desconto? ")
+        val desconto = readlnOrNull()?.toDoubleOrNull() ?: continue
+        print("Qual o número mínimo de aparelhos para conseguir o desconto? ")
+        val minimo = readlnOrNull()?.toIntOrNull() ?: continue
+
+        var total = valorAparelho * quantidade
+        if (quantidade > minimo) {
+            total *= (1 - desconto / 100)
+        }
+
+        println("O serviço de $empresa custará R$${total:.2f}")
+        orcamentos.add(empresa to total)
+
+        print("Deseja informar novos dados, $nome? (S/N): ")
+        if (readlnOrNull()?.uppercase() == "N") break
+    }
+
+    val menorOrcamento = orcamentos.minByOrNull { it.second } ?: return
+    println("O orçamento de menor valor é o de ${menorOrcamento.first} por R$${menorOrcamento.second:.2f}")
+}
+
+// Início do programa
+fun main() {
+    println("Bem vindo ao $HOTEL")
+    print("Qual o seu nome? ")
+    val nome = readlnOrNull() ?: return
+    print("Qual a sua senha? ")
+    val senha = readlnOrNull() ?: return
+    if (senha == "2678") {
+        boasVindas(nome)
+        inicio(nome)
+    } else {
+        println("Senha incorreta. Acesso negado.")
+    }
+}
